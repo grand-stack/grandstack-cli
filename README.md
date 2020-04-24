@@ -1,8 +1,14 @@
+[![npm version](https://badge.fury.io/js/grandstack.svg)](https://badge.fury.io/js/grandstack)
+
+> ⚠️ NOTE: This project is currently a work-in-progress. APIs are still changing and some things are not yet implemented. If you have any feedback please open an issue.
+
 # GRANDstack CLI
+
+<img src="img/neo4jlabs.png" width="50">
+<img src="img/grandstack.png" width="50">
 
 A command line interface for working with GRANDstack (GraphQL, React, Apollo, Neo4j Database) projects.
 
-**NOTE: This project is very experimental. Use at your own risk.**
 
 ## Install
 
@@ -12,7 +18,21 @@ npm install -g grandstack-cli
 
 ## Usage
 
-**NOTE: Consider this a planning document for how commands *could* work. Many of these are not yet implemented and the API is likely to change**
+> ⚠️ NOTE: Consider this a planning document for how commands *could* work. Many of these are not yet implemented and the API is likely to change. See the table below for current status of commands.
+
+|Command |Emoji | Subcommand |Status |
+|--------|------|------------|-------|
+| `graphql`  |      |             |       |
+|            | 🚧 | `dev`         | WIP - initial functionality  |
+|            | 🚧 | `inferschema` | WIP - initial functionality  |
+| `neo4j`    |     |              |                              |
+|            | ☠️ | `constraints` | Not yet implemented          |
+|            | ☠️ | `migrate`     | Not yet implemented          |
+| `deploy`   |     |              |                              |
+|            | 🚧 | `codesandbox` | WIP - initial functionality  |
+| `configure`| ☠️ |               | Not yet implemented          |
+
+
 
 ### Commands
 
