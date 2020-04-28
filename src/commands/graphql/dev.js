@@ -43,6 +43,9 @@ export const builder = (yargs) => {
     .option("encrypted", {
       description: "Use an encrypted connection to Neo4j"
     })
+    .option("database", {
+      description: "The Neo4j database to use"
+    })
     .option("graphql-port", {
       description: "The port for the GraphQL API to listen on",
       type: "number"
@@ -59,7 +62,8 @@ export const handler = ({
   neo4JUser,
   neo4JPassword,
   graphqlPort,
-  encrypted = false
+  encrypted = false,
+  database
 }) => {
   
   const port = graphqlPort || 3003;
@@ -71,7 +75,7 @@ export const handler = ({
     neo4j.auth.basic(neo4JUser, neo4JPassword), {encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}`}
   );
 
-  const server = new ApolloServer({ schema, context: { driver } });
+  const server = new ApolloServer({ schema, context: { driver, neo4jDatabase: database } });
 
   server.listen(port, "0.0.0.0").then(({ url }) => {
     console.log(`GraphQL API ready at ${url}`);

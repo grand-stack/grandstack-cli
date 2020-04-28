@@ -44,12 +44,14 @@ Start local GraphQL server.
 
 Options (should also be taken from environment variables):
   * `--types`
-  * `--types-file`
+  * `--types-file` *Not yet implemented*
   * `--neo4j-uri`
   * `--neo4j-user`
   * `--neo4j-password`
-  * `--port`
-  * `--debug` - log generated Cypher queries
+  * `--port` *Not yet implemented*
+  * `--encrypted` (boolean)
+  * `--database`
+  * `--debug` - log generated Cypher queries *Not yet implemented*
 
 
 **`grandstack graphql inferschema`**
@@ -57,12 +59,15 @@ Options (should also be taken from environment variables):
 Inspect existing Neo4j database and generate GraphQL type definitions.
 
 Options:
-  * `--file` - the file to write the generated type definitions to, if not specified log to standard out
+  * `--file` - the file to write the generated type definitions to, if not specified log to standard out *Not yet implemented*
   * `--neo4j-uri`
   * `--neo4j-user`
   * `--neo4j-password`
   * `--start-server` - start GraphQL server using generated type definitions instead of writing to file
-  * `--debug` - log generated Cypher queries
+  * `--debug` - log generated Cypher queries *Not yet implemented*
+  * `--run-server` (boolean)
+  * `--encrypted` (boolean)
+  * `--database`
 
 #### `neo4j`
 

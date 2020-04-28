@@ -36,6 +36,9 @@ export const builder = (yargs) => {
       description: "Use encrypted connection",
       boolean: true
     })
+    .option("database", {
+      description: "The Neo4j database to use"
+    })
     .option("run-server", {
       description: "Start  GraphQL server after generating type definitions",
       boolean: true,
@@ -53,6 +56,7 @@ export const handler = async ({
   graphqlPort,
   runServer,
   encrypted = false,
+  database
 }) => {
   const port = graphqlPort || 3003;
 
@@ -63,6 +67,7 @@ export const handler = async ({
 
   const schemaInferenceOptions = {
     alwaysIncludeRelationships: false,
+    database
   };
 
   const results = await inferSchema(driver, schemaInferenceOptions);
@@ -74,6 +79,8 @@ export const handler = async ({
         return {
           driver,
           req,
+          neo4jDatabase: database
+
         };
       },
     });
