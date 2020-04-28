@@ -32,6 +32,10 @@ export const builder = (yargs) => {
       description: "Database password for given user",
       required: true,
     })
+    .option("encrypted", {
+      description: "Use encrypted connection",
+      boolean: true
+    })
     .option("run-server", {
       description: "Start  GraphQL server after generating type definitions",
       boolean: true,
@@ -48,12 +52,13 @@ export const handler = async ({
   neo4JPassword,
   graphqlPort,
   runServer,
+  encrypted = false,
 }) => {
   const port = graphqlPort || 3003;
 
   const driver = neo4j.driver(
     neo4JUri,
-    neo4j.auth.basic(neo4JUser, neo4JPassword)
+    neo4j.auth.basic(neo4JUser, neo4JPassword), {encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}`}
   );
 
   const schemaInferenceOptions = {
