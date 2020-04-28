@@ -26,6 +26,9 @@ export const builder = (yargs) => {
       description: "Database password for given user",
       required: true,
     })
+    .option("database", {
+      description: "The Neo4j database to use"
+    })
     .option("graphql-port", {
       description: "The port for the GraphQL API to listen on",
       type: "number",
@@ -37,28 +40,35 @@ export const builder = (yargs) => {
 };
 
 // if no types option provided, then use inferSchema
-const getInferredTypes = async (neo4jUri, neo4jUser, neo4jPassword) => {
+const getInferredTypes = async (neo4jUri, neo4jUser, neo4jPassword, database, encrypted) => {
   const driver = neo4j.driver(
     neo4jUri,
-    neo4j.auth.basic(neo4jUser, neo4jPassword)
+    neo4j.auth.basic(neo4jUser, neo4jPassword), {encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}`}
   );
 
   const schemaInferenceOptions = {
     alwaysIncludeRelationships: false,
+    database
   };
 
   const results = await inferSchema(driver, schemaInferenceOptions);
   return results.typeDefs;
 };
 
+const getNeo4jDatabaseString = (db) => {
+  return db ? `neo4jDatabase: "${db}"` : ""
+}
+
 export const handler = async ({
   neo4JUri,
   neo4JUser,
   neo4JPassword,
-  types
+  types,
+  encrypted,
+  database
 }) => {
   if (!types) {
-    types = await getInferredTypes(neo4JUri, neo4JUser, neo4JPassword)
+    types = await getInferredTypes(neo4JUri, neo4JUser, neo4JPassword, database, encrypted)
   }
   const parameters = getParameters({
     files: {
@@ -87,10 +97,10 @@ const typeDefs = fs.readFileSync(path.join(__dirname, "schema.graphql")).toStrin
 const schema = makeAugmentedSchema({typeDefs})
 const driver = neo4j.driver(
   process.env.NEO4J_URI,
-  neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
+  neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)${encrypted ? ", {encrypted: 'ENCRYPTION_ON'}" : ""}
 )
 
-const server = new ApolloServer({ schema, context: { driver } });
+const server = new ApolloServer({ schema, context: { driver,${getNeo4jDatabaseString(database)} } });
 
 server.listen(3000, "0.0.0.0").then(({ url }) => {
   console.log("GraphQL API ready");
