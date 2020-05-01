@@ -60,23 +60,23 @@ const getNeo4jDatabaseString = (db) => {
 }
 
 export const handler = async ({
-  neo4JUri,
-  neo4JUser,
-  neo4JPassword,
+  "neo4j-uri": neo4j_uri,
+  "neo4j-user": neo4j_user,
+  "neo4j-password": neo4j_password,
   types,
   encrypted,
   database
 }) => {
   if (!types) {
-    types = await getInferredTypes(neo4JUri, neo4JUser, neo4JPassword, database, encrypted)
+    types = await getInferredTypes(neo4j_uri, neo4j_user, neo4j_password, database, encrypted)
   }
   const parameters = getParameters({
     files: {
       ".env": {
         content: `
-NEO4J_URI=${neo4JUri}
-NEO4J_USER=${neo4JUser}
-NEO4J_PASSWORD=${neo4JPassword}`,
+NEO4J_URI=${neo4j_uri}
+NEO4J_USER=${neo4j_user}
+NEO4J_PASSWORD=${neo4j_password}`,
       },
       "schema.graphql": {
         content: `${types}`,

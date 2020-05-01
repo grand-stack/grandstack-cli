@@ -58,21 +58,21 @@ export const builder = (yargs) => {
 
 export const handler = ({
   types,
-  neo4JUri,
-  neo4JUser,
-  neo4JPassword,
-  graphqlPort,
+  "neo4j-uri": neo4j_uri,
+  "neo4j-user": neo4j_user,
+  "neo4j-password": neo4j_password,
+  "graphql-port": graphql_port,
   encrypted = false,
   database
 }) => {
   
-  const port = graphqlPort || 3003;
+  const port = graphql_port || 3003;
 
   const schema = makeAugmentedSchema({ typeDefs: types });
 
   const driver = neo4j.driver(
-    neo4JUri,
-    neo4j.auth.basic(neo4JUser, neo4JPassword), {encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}`}
+    neo4j_uri,
+    neo4j.auth.basic(neo4j_user, neo4j_password), {encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}`}
   );
 
   const server = new ApolloServer({ schema, context: { driver, neo4jDatabase: database } });
