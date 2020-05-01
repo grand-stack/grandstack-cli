@@ -48,7 +48,7 @@ Options (should also be taken from environment variables):
   * `--neo4j-uri`
   * `--neo4j-user`
   * `--neo4j-password`
-  * `--port` *Not yet implemented*
+  * `--graphql-port`
   * `--encrypted` (boolean)
   * `--database`
   * `--debug` - log generated Cypher queries *Not yet implemented*
@@ -68,6 +68,7 @@ Options:
   * `--run-server` (boolean)
   * `--encrypted` (boolean)
   * `--database`
+  * `--graphql-port`
 
 #### `neo4j`
 
