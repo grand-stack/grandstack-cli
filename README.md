@@ -4,16 +4,13 @@
 
 # GRANDstack CLI
 
-<img src="img/neo4jlabs.png" width="50">
-<img src="img/grandstack.png" width="50">
-
 A command line interface for working with GRANDstack (GraphQL, React, Apollo, Neo4j Database) projects.
 
 
 ## Install
 
 ```
-npm install -g grandstack-cli
+npm install -g grandstack
 ```
 
 ## Usage
