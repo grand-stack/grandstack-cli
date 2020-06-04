@@ -56,12 +56,12 @@ Options (should also be taken from environment variables):
 Inspect existing Neo4j database and generate GraphQL type definitions.
 
 Options:
-  * `--file` - the file to write the generated type definitions to, if not specified log to standard out *Not yet implemented*
+  * `--schema-file` - the file to write the generated type definitions to, if not specified log to standard out
   * `--neo4j-uri`
   * `--neo4j-user`
   * `--neo4j-password`
   * `--start-server` - start GraphQL server using generated type definitions instead of writing to file
-  * `--debug` - log generated Cypher queries *Not yet implemented*
+  * `--debug` - log generated Cypher queries when using `--run-server` *Not yet implemented*
   * `--run-server` (boolean)
   * `--encrypted` (boolean)
   * `--database`

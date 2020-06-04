@@ -1,6 +1,7 @@
 const { makeAugmentedSchema, inferSchema } = require("neo4j-graphql-js");
 const { ApolloServer } = require("apollo-server");
 const neo4j = require("neo4j-driver");
+const fs = require("fs");
 
 export const command = "inferschema";
 export const desc =
@@ -34,10 +35,13 @@ export const builder = (yargs) => {
     })
     .option("encrypted", {
       description: "Use encrypted connection",
-      boolean: true
+      boolean: true,
     })
     .option("database", {
-      description: "The Neo4j database to use"
+      description: "The Neo4j database to use",
+    })
+    .option("schema-file", {
+      description: "The file to write the inferred schema to",
     })
     .option("run-server", {
       description: "Start  GraphQL server after generating type definitions",
@@ -55,22 +59,37 @@ export const handler = async ({
   "neo4j-password": neo4j_password,
   "graphql-port": graphql_port,
   "run-server": run_server,
+  "schema-file": schema_file,
   encrypted = false,
-  database
+  database,
 }) => {
   const port = graphql_port || 3003;
 
   const driver = neo4j.driver(
     neo4j_uri,
-    neo4j.auth.basic(neo4j_user, neo4j_password), {encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}`}
+    neo4j.auth.basic(neo4j_user, neo4j_password),
+    { encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}` }
   );
 
   const schemaInferenceOptions = {
     alwaysIncludeRelationships: false,
-    database
+    database,
   };
 
   const results = await inferSchema(driver, schemaInferenceOptions);
+
+  if (schema_file) {
+    console.log("Writing to schema file");
+    const filepath = schema_file;
+
+    try {
+      console.log("Writing GraphQL type definitions to file");
+      fs.writeFileSync(schema_file, results.typeDefs);
+      console.log("Inferred GraphQL type definitions written to", filepath);
+    } catch (err) {
+      console.log(err.message);
+    }
+  }
 
   if (run_server) {
     const server = new ApolloServer({
@@ -79,8 +98,7 @@ export const handler = async ({
         return {
           driver,
           req,
-          neo4jDatabase: database
-
+          neo4jDatabase: database,
         };
       },
     });
@@ -92,8 +110,9 @@ export const handler = async ({
       })
       .catch((err) => console.error(err));
   } else {
-    // TODO: check for type defs file option and write to file
-    console.log(results.typeDefs);
+    if (!schema_file) {
+      console.log(results.typeDefs);
+    }
     process.exit(0);
   }
 };
