@@ -1,6 +1,6 @@
 {
   "name": "grandstack",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Command line tool for GRANDstack and Neo4j GraphQL",
   "main": "./src/grandstack.js",
   "bin": "./dist/grandstack.js",
