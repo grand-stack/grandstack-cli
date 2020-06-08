@@ -27,6 +27,7 @@ npm install -g grandstack
 |            | ☠️ | `migrate`     | Not yet implemented          |
 | `deploy`   |     |              |                              |
 |            | 🚧 | `codesandbox` | WIP - initial functionality  |
+|            | 🚧 | `file`        | WIP - initial functionality
 | `configure`| ☠️ |               | Not yet implemented          |
 
 
@@ -88,6 +89,10 @@ Generate refactor Cypher statements given a GraphQL schema diff.
 ```
 grandstack deploy api codesandbox
 ```
+
+**`grandstack deploy file --types "type Person {name: String}" --path ./foobar`**
+
+Write projects to filesystem, passing type definitions as an argument
 
 #### `configure`
 
