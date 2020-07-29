@@ -74,7 +74,7 @@ export const handler = async ({
       process.exit(1);
     }
 
-    if (!neo4j_uri || !neo4j_user || !neo4j_password || !database) {
+    if (!neo4j_uri || !neo4j_user || !neo4j_password) {
       console.error(`Neo4j credentials missing`);
       console.log(`Try running agian with credentials \\
       --neo4j-uri bolt://localhost:7687 \\
