@@ -1,5 +1,5 @@
 import { Octokit } from "@octokit/rest";
-import { arrayOfFiles } from "./common"
+import { arrayOfFiles } from "../../../utils/deploy/common"
 
 export const command = "github";
 export const desc = "Export project to github";
@@ -81,7 +81,7 @@ export const handler = async ({
     try {
       // Creating new repo
       // Returned data is used for commit action
-      const { data: createdRepo } = await createForAuthenticatedUser({ name : "obvs-a-test", auto_init: true })
+      const { data: createdRepo } = await createForAuthenticatedUser({ name : repoName, auto_init: true })
       const { name: repo, owner: createdRepoOwner } = createdRepo
       const { login: owner } = createdRepoOwner
       console.log(`New Repository Created: ${repoName}`)
