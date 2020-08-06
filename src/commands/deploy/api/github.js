@@ -1,7 +1,12 @@
 import { Octokit } from "@octokit/rest";
+import { arrayOfFiles } from "./common"
 
 export const command = "github";
 export const desc = "Export project to github";
+
+// Going to leave this in here as it was invaluable in putting together
+// The final pieces
+// http://www.levibotelho.com/development/commit-a-file-with-the-github-api/
 
 export const builder = (yargs) => {
   yargs
@@ -14,110 +19,137 @@ export const builder = (yargs) => {
       type: "boolean",
       default: true,
     })
+    .option("repo-name", {
+      description: "Name for the new repo",
+      type: "string",
+      default: "architect-graph-project",
+    })
+    .option("oauth-token", {
+      description: "Oauth access token from client or manaully created",
+      required: true,
+      type: "string",
+    })
+    .option("database", {
+      description: "The Neo4j database to use",
+      type: "string",
+    })
+    .option("encrypted", {
+      description: "Whether or not to encrypt the database",
+      type: "boolean",
+      default: false,
+    })
+    .option("log-level", {
+      description: "What level to log out",
+      type: "string",
+    })
     .example(`$0 deploy github \\
-    --types "type Person {name: string}"`);
+    --types "type Person {name: string}"
+    --oauth-token 213r56ert57yertu \\
+    --repo-name new-graph-repo \\
+    --database neo4j \\
+    --log-level info \\
+    --encrypted \\
+    --new-repo`);
 };
 
-
+const newRepoTag = "newRepoAction"
 
 export const handler = async ({
   types,
+  logLevel,
   newRepo,
+  repoName,
+  oauthToken,
+  database,
+  encrypted
 }) => {
+  const octoOpts = {
+    auth: oauthToken,
+  }
+  if(logLevel === 'info') {
+    octoOpts.log = console
+  }
+  const octokit = new Octokit(octoOpts);
+  const { repos, git } = octokit
+  const { createForAuthenticatedUser } = repos
+  const { getRef, createBlob, createTree, createCommit, updateRef } = git
+
   if (newRepo) {
-
-    // https://api.github.com/graphql
-    // Accept: application/vnd.github.v3+json
-    // http://www.levibotelho.com/development/commit-a-file-with-the-github-api/
-
-    const octokit = new Octokit({
-      // log: console,
-      auth: tokenUser,
-    });
-    
+    console.time(newRepoTag)
+    console.log(`Creating New Repository and Pushing Commit...`)
 
     try {
-      const { data: createData } = await octokit.repos.createForAuthenticatedUser({ name : "obvs-a-test", auto_init: true })
-      const { name: repo, owner } = createData
-      const { login } = owner
+      // Creating new repo
+      // Returned data is used for commit action
+      const { data: createdRepo } = await createForAuthenticatedUser({ name : "obvs-a-test", auto_init: true })
+      const { name: repo, owner: createdRepoOwner } = createdRepo
+      const { login: owner } = createdRepoOwner
+      console.log(`New Repository Created: ${repoName}`)
 
-      // ref
-      const { data: ref } = await octokit.git.getRef({
-        owner: 'ed42311',
-        repo: 'obvs-a-test',
+      // Get reference SHA to master branch for new commit tree
+      const { data: createdRepoReference } = await getRef({
+        owner,
+        repo,
         ref: 'heads/master',
       });
-     
-      const parentSHA = ref.object.sha
+      const { object: referenceObject } = createdRepoReference
+      const baseTreeSHA = referenceObject.sha
 
+      // Build array of files to convert to blobs for the tree
+      const blobFileArray = arrayOfFiles({
+        owner,
+        repo,
+        types,
+        database,
+        encrypted
+      })
+      const blobs = await Promise.all(blobFileArray.map(async ({owner, repo, content, filename}) => {
+        const _res = await createBlob({owner, repo, content})
+        const { data: blob } = _res
+        const { sha } = blob
 
-      // const { data: repoData } = await octokit.repos.get({
-      //   owner: 'ed42311',
-      //   repo: 'obvs-a-test',
-      // });
-
-      const arrOfThings = [{
-        owner: 'ed42311',
-        repo: 'obvs-a-test',
-        content: '// Hello test',
-        filename: 'hello1.js'
-      },{
-        owner: 'ed42311',
-        repo: 'obvs-a-test',
-        content: '// Hello test 2',
-        filename: 'hello2.js'
-      },{
-        owner: 'ed42311',
-        repo: 'obvs-a-test',
-        content: '// Hello test 3',
-        filename: 'hello3.js'
-      }]
-      const blobs = await Promise.all(arrOfThings.map(async ({owner, repo, content, filename}) => {
-        const _res = await octokit.git.createBlob({owner, repo, content})
-        const { data } = _res
         return {
           "path": filename,
           "mode": "100644",
           "type": "blob",
-          "sha": data.sha
+          sha,
         }
       }));
-      console.log(blobs)
+      console.log(`Blobs built with new types...`)
 
-      const { data: tree } = await octokit.git.createTree({
-          owner: 'ed42311',
-          repo: 'obvs-a-test',
-          base_tree: parentSHA,
+      // Setup new tree with the blobs and grab the SHA
+      const { data: tree } = await createTree({
+          owner,
+          repo,
+          base_tree: baseTreeSHA,
           tree: blobs
         });
-      const treeSHA = tree.sha
+      const {sha: newTreeSHA } = tree
 
-      const { data: commit } = await octokit.git.createCommit({
-        owner: 'ed42311',
-        repo: 'obvs-a-test',
-        message: 'graphRepo new files',
-        tree: treeSHA,
-        parents: [parentSHA],
+      // Create a commit with the new tree
+      const { data: commit } = await createCommit({
+        owner,
+        repo,
+        message: 'First commit from grandstack CLI',
+        tree: newTreeSHA,
+        parents: [baseTreeSHA],
       });
-      const commitSHA = commit.sha
+      const {sha: commitSHA } = commit
+      console.log(`Tree built and attached to commit...`)
 
-      const { data: finalRef } = await octokit.git.updateRef({
-        owner: 'ed42311',
-        repo: 'obvs-a-test',
+      // Set the reference to the head of the master branch
+      const { data: finalRef } = await updateRef({
+        owner,
+        repo,
         ref: 'heads/master',
         sha: commitSHA,
       });
-      console.log(finalRef)
 
-
-      // await octokit.repos.delete({
-      //   owner: login,
-      //   repo,
-      // });
+      console.log(`Commit completed to master branch @: ${finalRef.url}`)
+      console.timeEnd(newRepoTag)
     } catch (error) {
       console.log(error)
     }
-
   }
 } 
 
