@@ -6,7 +6,7 @@ export const command = "dev";
 export const desc = "Start GraphQL service";
 
 /**
- * 
+ *
  * **`grandstack graphql dev`**
 
 Start local GraphQL server.
@@ -17,11 +17,10 @@ Options (should also be taken from environment variables):
   * `--neo4j-uri`
   * `--neo4j-user`
   * `--neo4j-password`
-  * `--port` 
+  * `--port`
  */
 
 export const builder = (yargs) => {
-  
   yargs
     .option("types", {
       description: "The GraphQL type definitions",
@@ -41,14 +40,14 @@ export const builder = (yargs) => {
       required: true,
     })
     .option("encrypted", {
-      description: "Use an encrypted connection to Neo4j"
+      description: "Use an encrypted connection to Neo4j",
     })
     .option("database", {
-      description: "The Neo4j database to use"
+      description: "The Neo4j database to use",
     })
     .option("graphql-port", {
       description: "The port for the GraphQL API to listen on",
-      type: "number"
+      type: "number",
     }).example(`$0 graphql dev \\
       --types "type Person {name: string}" \\
       --neo4j-uri bolt://localhost:7687 \\
@@ -63,19 +62,22 @@ export const handler = ({
   "neo4j-password": neo4j_password,
   "graphql-port": graphql_port,
   encrypted = false,
-  database
+  database,
 }) => {
-  
   const port = graphql_port || 3003;
 
   const schema = makeAugmentedSchema({ typeDefs: types });
 
   const driver = neo4j.driver(
     neo4j_uri,
-    neo4j.auth.basic(neo4j_user, neo4j_password), {encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}`}
+    neo4j.auth.basic(neo4j_user, neo4j_password),
+    { encrypted: `${encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF"}` }
   );
 
-  const server = new ApolloServer({ schema, context: { driver, neo4jDatabase: database } });
+  const server = new ApolloServer({
+    schema,
+    context: { driver, neo4jDatabase: database },
+  });
 
   server.listen(port, "0.0.0.0").then(({ url }) => {
     console.log(`GraphQL API ready at ${url}`);

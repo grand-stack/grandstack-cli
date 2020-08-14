@@ -1,7 +1,7 @@
 import { getParameters } from "codesandbox/lib/api/define";
 import { inferSchema } from "neo4j-graphql-js";
 import axios from "axios";
-const neo4j = require("neo4j-driver");
+import neo4j from "neo4j-driver";
 
 export const command = "codesandbox";
 export const desc = "Deploy to new CodeSandbox instance";
@@ -96,7 +96,7 @@ NEO4J_PASSWORD=${neo4j_password}`,
         content: `${types}`,
       },
       "index.js": {
-        content: /* JavaScript */ `      
+        content: /* JavaScript */ `
 const { makeAugmentedSchema } = require("neo4j-graphql-js");
 const { ApolloServer } = require("apollo-server");
 const neo4j = require("neo4j-driver");

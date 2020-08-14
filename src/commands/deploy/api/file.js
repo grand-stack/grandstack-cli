@@ -1,7 +1,5 @@
-import { boolean } from "yargs";
-
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 export const command = "file";
 export const desc = "Export project to filesystem";
