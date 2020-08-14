@@ -147,7 +147,7 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
     const sandbox_id = response.data.sandbox_id;
 
     const sandbox_url = `https://codesandbox.io/s/${sandbox_id}`;
-    const _res = await axios.get(sandbox_url);
+    await axios.get(sandbox_url);
     const graphql_url = `https://${sandbox_id}.sse.codesandbox.io`;
 
     console.log("GraphQL API deployed to new CodeSandbox instance");

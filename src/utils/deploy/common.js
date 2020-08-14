@@ -3,7 +3,7 @@ export const getNeo4jDatabaseString = (db) => {
 };
 
 export const getEncryptionKeyString = (encrypted) => {
-  return encrypted ? ", {encrypted: 'ENCRYPTION_ON'}" : ""
+  return encrypted ? ", {encrypted: 'ENCRYPTION_ON'}" : "";
 };
 
 const schemaGraphql = "schema.graphql";
@@ -14,7 +14,10 @@ node_modules
 `;
 
 const indexJs = "index.js";
-const indexJsContents = (database, encrypted) => `const { makeAugmentedSchema } = require("neo4j-graphql-js");
+const indexJsContents = (
+  database,
+  encrypted
+) => `const { makeAugmentedSchema } = require("neo4j-graphql-js");
 const { ApolloServer } = require("apollo-server");
 const neo4j = require("neo4j-driver");
 const dotenv = require("dotenv");
@@ -29,12 +32,14 @@ const typeDefs = fs.readFileSync(path.join(__dirname, "schema.graphql")).toStrin
 const schema = makeAugmentedSchema({typeDefs})
 const driver = neo4j.driver(
   NEO4J_URI,
-  neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD)${getEncryptionKeyString(encrypted)}
+  neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD)${getEncryptionKeyString(
+    encrypted
+  )}
 )
 
 const server = new ApolloServer({ schema, context: ${getNeo4jDatabaseString(
-      database
-    )} });
+  database
+)} });
 
 server.listen(3000, "0.0.0.0").then(({ url }) => {
   console.log("GraphQL API ready at: ", url);
@@ -54,26 +59,29 @@ const packageJsonContents = `{
 }
 `;
 
-export const arrayOfFiles = ({owner, repo, types, database, encrypted}) => ([
+export const arrayOfFiles = ({ owner, repo, types, database, encrypted }) => [
   {
     owner,
     repo,
     content: types,
-    filename: schemaGraphql
-  },{
+    filename: schemaGraphql,
+  },
+  {
     owner,
     repo,
     content: indexJsContents(database, encrypted),
-    filename: indexJs
-  },{
+    filename: indexJs,
+  },
+  {
     owner,
     repo,
     content: gitIgnoreContents,
-    filename: gitIgnore
-  },{
+    filename: gitIgnore,
+  },
+  {
     owner,
     repo,
     content: packageJsonContents,
-    filename: packageJson
-  }
-])
+    filename: packageJson,
+  },
+];
