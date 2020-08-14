@@ -1,24 +1,14 @@
-const { makeAugmentedSchema } = require("neo4j-graphql-js");
-const { ApolloServer } = require("apollo-server");
-const neo4j = require("neo4j-driver");
+import { writeConfig } from "../utils/";
 
-export const command = "graphql";
-export const desc = "Start GraphQL service";
+export const command = "configure";
+export const desc = "Setup configuration options for CLI";
 export const builder = {};
 
 export const handler = () => {
-  const typeDefs = `type Person {name: String}`;
-
-  const schema = makeAugmentedSchema({ typeDefs });
-
-  const driver = neo4j.driver(
-    "bolt://localhost:7687",
-    neo4j.auth.basic("neo4j", "letmin")
-  );
-
-  const server = new ApolloServer({ schema, context: { driver } });
-
-  server.listen(3003, "0.0.0.0").then(({ url }) => {
-    console.log(`GraphQL API ready at ${url}`);
-  });
+  const creds = {
+    neo4j_uri: "bolt://localhost:7687",
+    neo4j_user: "neo4j",
+    neo4j_password: "letmein",
+  };
+  writeConfig(creds);
 };

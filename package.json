@@ -38,6 +38,7 @@
     "axios": "^0.19.2",
     "babel-plugin-auto-import": "^1.0.5",
     "babel-plugin-module-resolver": "^4.0.0",
+    "chalk": "^4.1.0",
     "codesandbox": "^2.1.14",
     "neo4j-graphql-js": "^2.15.0",
     "yargs": "^15.3.1"

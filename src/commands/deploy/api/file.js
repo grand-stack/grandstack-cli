@@ -1,5 +1,8 @@
 import fs from "fs";
 import path from "path";
+import chalk from "chalk";
+
+import { exitWithOutput, dirExistsAndIsNotEmpty } from "../../../utils";
 
 export const command = "file";
 export const desc = "Export project to filesystem";
@@ -64,14 +67,14 @@ export const handler = async ({
   encrypted,
   database,
 }) => {
+  if (dirExistsAndIsNotEmpty(filePath)) {
+    exitWithOutput({
+      tag: "ERROR",
+      msg: `'${filePath}' already exists and is not empty.`,
+      code: 1,
+    });
+  }
   if (newProject) {
-    const appDirExists = fs.existsSync(filePath);
-
-    if (appDirExists && fs.readdirSync(filePath).length > 0) {
-      console.error(`'${filePath}' already exists and is not empty.`);
-      process.exit(1);
-    }
-
     if (!neo4j_uri || !neo4j_user || !neo4j_password) {
       console.error(`Neo4j credentials missing`);
       console.log(`Try running agian with credentials \\
@@ -141,22 +144,22 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
       await fs.promises.writeFile(gitIgnoreFile, gitIgnoreContents);
       await fs.promises.writeFile(indexFile, indexContents);
       await fs.promises.writeFile(jsonFile, jsonContents);
-      console.log("Done writing!");
-      console.log(`cd into ${filePath} and run 'npm install'`);
+      console.log(chalk.green("Done Writing!"));
+      console.log(chalk.green(`cd into ${filePath} and run 'npm install'`));
     } catch (err) {
-      console.log(err.message);
+      exitWithOutput({ tag: "ERROR", msg: err.message, code: 1 });
     }
     return;
   }
 
-  // Not new project, file write
-  const schemaFile = path.join(filePath, "schema.graphql");
-  console.log("Writing to ", schemaFile);
-
   try {
-    fs.writeFileSync(schemaFile, types);
-    console.log("Done writing!");
+    // Not new project, file write
+    const schemaFile = path.join(filePath, "schema.graphql");
+    console.log("Writing to ", schemaFile);
+    await fs.promises.mkdir(filePath, { recursive: true });
+    await fs.promises.writeFile(schemaFile, types);
+    console.log(chalk.green("Done Writing!"));
   } catch (err) {
-    console.log(err.message);
+    exitWithOutput({ tag: "ERROR", msg: err.message, code: 1 });
   }
 };
