@@ -30,8 +30,7 @@ npm install -g grandstack
 |            | 🚧    | `file`         | WIP - initial functionality  |
 |            | 🚧    | `github`       | WIP - in dev                 |
 |            | 🚧    | `api`          | WIP - initial functionality  |
-| `configure`| 🚧    |                | WIP - in dev                 |
-
+| `configure`| 🚧    |                | WIP - initial functionality  |
 
 
 ### Commands
@@ -113,10 +112,10 @@ Options:
 
 **`grandstack configure`**
 
-*Then prompt for Neo4j credentials, etc*
-
-Currently stores some base level creds in `~/.grandstack`
-
-**`grandstack configure --profile newprofile`**
-
-*The prompt for Neo4j credentials, etc, but save in named profile*
+Options:
+  * `--where-is` - points you towards current grandstack dir
+  * `--profile name` - creates a new json profile with creds stored
+  * `--init` - establishes a grandstack folder if none exists
+  * `--neo4j-uri`
+  * `--neo4j-user`
+  * `--neo4j-password`

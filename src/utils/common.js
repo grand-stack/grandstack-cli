@@ -1,3 +1,5 @@
+import { exitWithError } from "./logger";
+
 export const getNeo4jDatabaseString = (db) => {
   return db ? `{ driver, neo4jDatabase: "${db}" }` : "{ driver }";
 };
@@ -85,3 +87,18 @@ export const arrayOfFiles = ({ owner, repo, types, database, encrypted }) => [
     filename: packageJson,
   },
 ];
+
+export const checkCredentials = (neo4j_uri, neo4j_user, neo4j_password) => {
+  if (!neo4j_uri || !neo4j_user || !neo4j_password) {
+    const msg = `Try running agian with credentials \\
+--neo4j-uri bolt://localhost:7687 \\
+--neo4j-user neo4j \\
+--neo4j-password letmein
+`;
+    exitWithError({
+      tag: `CREDSMISSING`,
+      msg,
+      code: 9,
+    });
+  }
+};
