@@ -1,24 +1,80 @@
-const { makeAugmentedSchema } = require("neo4j-graphql-js");
-const { ApolloServer } = require("apollo-server");
-const neo4j = require("neo4j-driver");
+import {
+  checkCredentials,
+  createConfigDir,
+  infoExitZero,
+  whereIsConfigDir,
+  createProfileJson,
+} from "../utils/";
 
-export const command = "graphql";
-export const desc = "Start GraphQL service";
-export const builder = {};
+export const command = "configure";
+export const desc = "Setup configuration options for CLI";
 
-export const handler = () => {
-  const typeDefs = `type Person {name: String}`;
+export const builder = (yargs) => {
+  yargs
+    .option("init", {
+      alias: "i",
+      description: "Initialize configuration",
+      type: "boolean",
+      default: false,
+    })
+    .option("where-is", {
+      alias: "w",
+      description: "The current path to your configuration directory",
+      type: "boolean",
+      default: false,
+    })
+    .option("profile", {
+      alias: "p",
+      description: "Create a new named profile",
+      type: "string",
+    })
+    .option("neo4j-uri", {
+      description:
+        'URI for the Neo4j instance. Example: "bolt://localhost:7798"',
+      type: "string",
+    })
+    .option("neo4j-user", {
+      description: "Database user",
+      type: "string",
+    })
+    .option("neo4j-password", {
+      description: "Database password for given user",
+      type: "string",
+    }).example(`$0 configure \\
+    --neo4j-uri bolt://localhost:7687 \\
+    --neo4j-user neo4j \\
+    --neo4j-password letmein \\
+    --new-profile graph-test`);
+};
 
-  const schema = makeAugmentedSchema({ typeDefs });
+export const handler = async ({
+  profile,
+  whereIs,
+  init,
+  "neo4j-uri": neo4j_uri,
+  "neo4j-user": neo4j_user,
+  "neo4j-password": neo4j_password,
+}) => {
+  if (whereIs) {
+    infoExitZero(whereIsConfigDir());
+  }
 
-  const driver = neo4j.driver(
-    "bolt://localhost:7687",
-    neo4j.auth.basic("neo4j", "letmin")
-  );
+  if (init) {
+    createConfigDir();
+    infoExitZero(whereIsConfigDir());
+  }
 
-  const server = new ApolloServer({ schema, context: { driver } });
-
-  server.listen(3003, "0.0.0.0").then(({ url }) => {
-    console.log(`GraphQL API ready at ${url}`);
-  });
+  if (profile) {
+    checkCredentials(neo4j_uri, neo4j_user, neo4j_password);
+    // TODO: no creds run enquirer
+    // How to handle low level versus interactive
+    createConfigDir();
+    const profilePath = createProfileJson({
+      profile,
+      neo4j_uri,
+      neo4j_user,
+      neo4j_password,
+    });
+    infoExitZero(`Profile created at ${profilePath}`);
+  }
 };

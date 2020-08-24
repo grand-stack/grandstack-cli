@@ -10,6 +10,8 @@
   "scripts": {
     "build": "yarn clean && babel src --out-dir dist",
     "build:watch": "nodemon --ignore dist --exec 'yarn build'",
+    "lint": "eslint --ext .js src --color",
+    "format": "prettier --write src/**/*.js",
     "clean": "rm -rf dist",
     "prepublishOnly": "yarn clean && yarn build",
     "test": "mocha --require @babel/register --recursive --watch"
@@ -36,12 +38,20 @@
     "axios": "^0.19.2",
     "babel-plugin-auto-import": "^1.0.5",
     "babel-plugin-module-resolver": "^4.0.0",
+    "chalk": "^4.1.0",
     "codesandbox": "^2.1.14",
     "neo4j-graphql-js": "^2.15.0",
     "yargs": "^15.3.1"
   },
   "devDependencies": {
     "@babel/register": "^7.10.5",
-    "mocha": "^8.1.1"
+    "eslint": "^7.6.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
+    "mocha": "^8.1.1",
+    "prettier": "^2.0.5",
+    "prettier-eslint-cli": "^5.0.0"
   }
 }

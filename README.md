@@ -17,24 +17,25 @@ npm install -g grandstack
 
 > ⚠️ NOTE: Consider this a planning document for how commands *could* work. Many of these are not yet implemented and the API is likely to change. See the table below for current status of commands.
 
-|Command |Emoji | Subcommand |Status |
-|--------|------|------------|-------|
-| `graphql`  |      |             |       |
-|            | 🚧 | `dev`         | WIP - initial functionality  |
-|            | 🚧 | `inferschema` | WIP - initial functionality  |
-| `neo4j`    |     |              |                              |
-|            | ☠️ | `constraints` | Not yet implemented          |
-|            | ☠️ | `migrate`     | Not yet implemented          |
-| `deploy`   |     |              |                              |
-|            | 🚧 | `codesandbox` | WIP - initial functionality  |
-|            | 🚧 | `file`        | WIP - initial functionality
-| `configure`| ☠️ |               | Not yet implemented          |
-
+|Command     | Emoji | Subcommand     | Status                       |
+|--------    |------ |------------    |-------                       |
+| [`graphql`](#graphql)  | |          |                              |
+|            | 🚧    | `dev`          | WIP - initial functionality  |
+|            | 🚧    | `inferschema`  | WIP - initial functionality  |
+| `neo4j`    |       |                |                              |
+|            | ☠️     | `constraints`  | Not yet implemented          |
+|            | ☠️     | `migrate`      | Not yet implemented          |
+| `deploy`   |       |                |                              |
+|            | 🚧    | `codesandbox`  | WIP - initial functionality  |
+|            | 🚧    | `file`         | WIP - initial functionality  |
+|            | 🚧    | `github`       | WIP - in dev                 |
+|            | 🚧    | `api`          | WIP - initial functionality  |
+| `configure`| 🚧    |                | WIP - initial functionality  |
 
 
 ### Commands
 
-#### `graphql`
+#### <a name="graphql"></a> `graphql`
 
 **`grandstack graphql dev`**
 
@@ -94,17 +95,27 @@ grandstack deploy api codesandbox
 
 Write projects to filesystem, passing type definitions as an argument
 
+**`grandstack deploy github`**
+
+Create new github repo from files, types and database
+
+Options:
+  * `--repo-name` - a name for your repo, dashes and lowercase
+  * `--oauth-token` - your manually generated [auth token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with repo scope
+  * `--database` - name of the database if you have one, only applies to graph versions > 3.5
+  * `--encrypted` (boolean) - whether or not your database is encrypted
+  * `--new-repo` (boolean) - whether this is a new repo or you are connecting to a current repo (current repo option not yet available)
+
 #### `configure`
 
 *Create profiles with Neo4j credentials, etc*
-*Credentials and profiles can be stored in `~/.grandstack`*
 
 **`grandstack configure`**
 
-*Then prompt for Neo4j credentials, etc*
-
-**`grandstack configure --profile newprofile`**
-
-*The prompt for Neo4j credentials, etc, but save in named profile*
-
-
+Options:
+  * `--where-is` - points you towards current grandstack dir
+  * `--profile name` - creates a new json profile with creds stored
+  * `--init` - establishes a grandstack folder if none exists
+  * `--neo4j-uri`
+  * `--neo4j-user`
+  * `--neo4j-password`
