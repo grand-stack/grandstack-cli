@@ -1,5 +1,5 @@
 import { Octokit } from "@octokit/rest";
-import { arrayOfFiles } from "../../../utils/deploy/common";
+import { arrayOfFiles } from "../../../utils";
 
 export const command = "github";
 export const desc = "Export project to github";
