@@ -1,5 +1,12 @@
 import { Octokit } from "@octokit/rest";
-import { arrayOfFiles } from "../../../utils";
+import {
+  arrayOfFiles,
+  checkGHRef,
+  exitWithError,
+  info,
+  logData,
+  perf,
+} from "../../../utils";
 
 export const command = "github";
 export const desc = "Export project to github";
@@ -11,18 +18,24 @@ export const desc = "Export project to github";
 export const builder = (yargs) => {
   yargs
     .option("types", {
+      alias: "t",
       description: "The GraphQL type definitions",
       required: true,
     })
     .option("new-repo", {
-      description: "Whether or not to write a new project",
+      alias: "n",
+      description: "Whether or not to create a new repo",
       type: "boolean",
-      default: true,
+      default: false,
     })
     .option("repo-name", {
       description: "Name for the new repo",
       type: "string",
       default: "architect-graph-project",
+    })
+    .option("repo-owner", {
+      description: "Github handle for the repo owner",
+      type: "string",
     })
     .option("oauth-token", {
       description: "Oauth access token from client or manaully created",
@@ -30,10 +43,12 @@ export const builder = (yargs) => {
       type: "string",
     })
     .option("database", {
+      alias: "d",
       description: "The Neo4j database to use",
       type: "string",
     })
     .option("encrypted", {
+      alias: "e",
       description: "Whether or not to encrypt the database",
       type: "boolean",
       default: false,
@@ -45,18 +60,25 @@ export const builder = (yargs) => {
     --types "type Person {name: string}"
     --oauth-token 213r56ert57yertu \\
     --repo-name new-graph-repo \\
+    --repo-owner joeSmith123 \\
     --database neo4j \\
     --log-level info \\
     --encrypted \\
-    --new-repo`);
+    --new-repo \\
+`);
 };
 
 const newRepoTag = "newRepoAction";
+const updateRepoTag = "updateRepoAction";
+
+// deploy github --types "type Person {name: string}" --oauth-token ffqsdgfg312gsg --new-repo --repo-name architect-graph-project --database neo4j --encrypted
+// deploy github --types "type Person {name: string}" --oauth-token ffqsdgfg312gsg --repo-name architect-graph-project --repo-owner ed42311
 
 export const handler = async ({
   types,
   logLevel,
   newRepo,
+  repoOwner,
   repoName,
   oauthToken,
   database,
@@ -71,11 +93,19 @@ export const handler = async ({
   const octokit = new Octokit(octoOpts);
   const { repos, git } = octokit;
   const { createForAuthenticatedUser } = repos;
-  const { getRef, createBlob, createTree, createCommit, updateRef } = git;
+  const {
+    getRef,
+    createBlob,
+    createTree,
+    createCommit,
+    updateRef,
+    getTree,
+  } = git;
+  const masterRef = "heads/master";
 
   if (newRepo) {
-    console.time(newRepoTag);
-    console.log(`Creating New Repository and Pushing Commit...`);
+    perf(true, newRepoTag);
+    info(`Creating New Repository and Pushing Commit...`);
 
     try {
       // Creating new repo
@@ -86,13 +116,13 @@ export const handler = async ({
       });
       const { name: repo, owner: createdRepoOwner } = createdRepo;
       const { login: owner } = createdRepoOwner;
-      console.log(`New Repository Created: ${repoName}`);
+      info(`New Repository Created: ${repoName}`);
 
       // Get reference SHA to master branch for new commit tree
       const { data: createdRepoReference } = await getRef({
         owner,
         repo,
-        ref: "heads/master",
+        ref: masterRef,
       });
       const { object: referenceObject } = createdRepoReference;
       const baseTreeSHA = referenceObject.sha;
@@ -119,7 +149,7 @@ export const handler = async ({
           };
         })
       );
-      console.log(`Blobs built with new types...`);
+      info(`Blobs built with new types...`);
 
       // Setup new tree with the blobs and grab the SHA
       const { data: tree } = await createTree({
@@ -139,20 +169,101 @@ export const handler = async ({
         parents: [baseTreeSHA],
       });
       const { sha: commitSHA } = commit;
-      console.log(`Tree built and attached to commit...`);
+      info(`Tree built and attached to commit...`);
 
       // Set the reference to the head of the master branch
       const { data: finalRef } = await updateRef({
         owner,
         repo,
-        ref: "heads/master",
+        ref: masterRef,
+        sha: commitSHA,
+      });
+      const refData = {
+        repoOwner: owner,
+        repoName: repo,
+        repoUrl: finalRef.url,
+      };
+
+      info(`Commit completed to master branch @: ${finalRef.url}`);
+      logData(`refData`, JSON.stringify(refData));
+      perf(false, newRepoTag);
+    } catch (error) {
+      exitWithError({ tag: "GITHUBERR", msg: error, code: 1 });
+    }
+  } else {
+    checkGHRef(repoName, repoOwner);
+    perf(true, updateRepoTag);
+    info(`Getting Repository reference...`);
+    try {
+      const { data: foundationRepo } = await getRef({
+        owner: repoOwner,
+        repo: repoName,
+        ref: masterRef,
+      });
+      const { object } = foundationRepo;
+      const { sha: foundationRepoSha } = object;
+
+      info(`Getting Full Repository tree and filtering...`);
+      const treeRes = await getTree({
+        owner: repoOwner,
+        repo: repoName,
+        tree_sha: foundationRepoSha,
+        recursive: true,
+      });
+      const { data: treeData } = treeRes;
+      const { tree: recursiveTree } = treeData;
+      // ts path is string
+      const treeAllButSchema = recursiveTree.filter(
+        ({ path }) => !path.includes(".graphql")
+      );
+
+      const blobRes = await createBlob({
+        owner: repoOwner,
+        repo: repoName,
+        content: types,
+      });
+
+      const { data: blob } = blobRes;
+      const { sha: newSchemaSha } = blob;
+
+      const schemaFile = {
+        path: "schema.graphql",
+        mode: "100644",
+        type: "blob",
+        sha: newSchemaSha,
+      };
+
+      // Setup new tree with the blobs and grab the SHA
+      const { data: tree } = await createTree({
+        owner: repoOwner,
+        repo: repoName,
+        tree: [...treeAllButSchema, schemaFile],
+      });
+      const { sha: newTreeSHA } = tree;
+
+      // Create a commit with the new tree
+      info(`Creating commit with updated tree...`);
+      const { data: commit } = await createCommit({
+        owner: repoOwner,
+        repo: repoName,
+        message: "Updated schema file from CLI",
+        tree: newTreeSHA,
+        parents: [foundationRepoSha],
+      });
+      const { sha: commitSHA } = commit;
+
+      // Set the reference to the head of the master branch
+      const { data: finalRef } = await updateRef({
+        owner: repoOwner,
+        repo: repoName,
+        ref: masterRef,
         sha: commitSHA,
       });
 
-      console.log(`Commit completed to master branch @: ${finalRef.url}`);
-      console.timeEnd(newRepoTag);
+      info(`Reference updated: ${finalRef.object.url}`);
+      perf(false, updateRepoTag);
     } catch (error) {
-      console.log(error);
+      exitWithError({ tag: "GITHUBERR", msg: error, code: 1 });
     }
   }
 };
