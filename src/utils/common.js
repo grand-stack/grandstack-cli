@@ -1,4 +1,4 @@
-import { exitWithError } from "./logger";
+import { exitWithWarning } from "./logger";
 
 export const getNeo4jDatabaseString = (db) => {
   return db ? `{ driver, neo4jDatabase: "${db}" }` : "{ driver }";
@@ -95,8 +95,24 @@ export const checkCredentials = (neo4j_uri, neo4j_user, neo4j_password) => {
 --neo4j-user neo4j \\
 --neo4j-password letmein
 `;
-    exitWithError({
-      tag: `CREDSMISSING`,
+    exitWithWarning({
+      tag: `PARAMSMISSING`,
+      msg,
+      code: 9,
+    });
+  }
+};
+
+export const checkGHRef = (repoName, repoOwner) => {
+  if (!repoName || !repoOwner) {
+    const msg = `
+    Syncing a repository requires the owners username and repo name \\
+    Try running agian with \\
+    --repo-name awesome-repo-name \\
+    --repo-owner greatUsername1 \\
+`;
+    exitWithWarning({
+      tag: `PARAMSMISSING`,
       msg,
       code: 9,
     });
