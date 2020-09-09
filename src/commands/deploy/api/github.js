@@ -105,8 +105,8 @@ export const handler = async ({
   const masterRef = "heads/master";
 
   if (newRepo) {
-    perf(true, newRepoTag);
-    info(`Creating New Repository and Pushing Commit...`);
+    console.time(newRepoTag);
+    console.log(`Creating New Repository and Pushing Commit...`);
 
     try {
       // Creating new repo
@@ -150,7 +150,7 @@ export const handler = async ({
           };
         })
       );
-      info(`Blobs built with new types...`);
+      console.log(`Blobs built with new types...`);
 
       // Setup new tree with the blobs and grab the SHA
       const { data: tree } = await createTree({
@@ -170,7 +170,7 @@ export const handler = async ({
         parents: [baseTreeSHA],
       });
       const { sha: commitSHA } = commit;
-      info(`Tree built and attached to commit...`);
+      console.log(`Tree built and attached to commit...`);
 
 
       // Set the reference to the head of the master branch
@@ -184,16 +184,16 @@ export const handler = async ({
         repoName: repo,
         repoUrl: finalRef.url,
       };
-      info(`Commit completed to master branch @: ${finalRef.url}`);
-      logData(`refData`, JSON.stringify(refData));
-      perf(false, newRepoTag);
+      console.log(`Commit completed to master branch @: ${finalRef.url}`);
+      console.log(`$refData=>%s`, JSON.stringify(refData));
+      console.timeEnd(newRepoTag);
     } catch (error) {
       exitWithError({ tag: "GITHUBERR", msg: error, code: 1 });
     }
   } else {
     checkGHRef(repoName, repoOwner);
-    perf(true, updateRepoTag);
-    info(`Getting Repository reference...`);
+    console.time(updateRepoTag);
+    console.log(`Getting Repository reference...`);
     try {
       const { data: foundationRepo } = await getRef({
         owner: repoOwner,
@@ -203,7 +203,7 @@ export const handler = async ({
       const { object } = foundationRepo;
       const { sha: foundationRepoSha } = object;
 
-      info(`Getting Full Repository tree and filtering...`);
+      console.log(`Getting Full Repository tree and filtering...`);
       const treeRes = await getTree({
         owner: repoOwner,
         repo: repoName,
@@ -242,7 +242,7 @@ export const handler = async ({
       const { sha: newTreeSHA } = tree;
 
       // Create a commit with the new tree
-      info(`Creating commit with updated tree...`);
+      console.log(`Creating commit with updated tree...`);
       const { data: commit } = await createCommit({
         owner: repoOwner,
         repo: repoName,
@@ -260,8 +260,8 @@ export const handler = async ({
         sha: commitSHA,
       });
 
-      info(`Reference updated: ${finalRef.object.url}`);
-      perf(false, updateRepoTag);
+      console.log(`Reference updated: ${finalRef.object.url}`);
+      console.timeEnd( updateRepoTag);
     } catch (error) {
       exitWithError({ tag: "GITHUBERR", msg: error, code: 1 });
     }
