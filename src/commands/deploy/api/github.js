@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest";
+
 import {
   arrayOfFiles,
   checkGHRef,
@@ -171,19 +172,18 @@ export const handler = async ({
       const { sha: commitSHA } = commit;
       info(`Tree built and attached to commit...`);
 
+
       // Set the reference to the head of the master branch
       const { data: finalRef } = await updateRef({
         owner,
         repo,
         ref: masterRef,
-        sha: commitSHA,
       });
       const refData = {
         repoOwner: owner,
         repoName: repo,
         repoUrl: finalRef.url,
       };
-
       info(`Commit completed to master branch @: ${finalRef.url}`);
       logData(`refData`, JSON.stringify(refData));
       perf(false, newRepoTag);
