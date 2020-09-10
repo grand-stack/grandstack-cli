@@ -1,8 +1,7 @@
 import fs from "fs";
 import path from "path";
-import chalk from "chalk";
 
-import { exitWithOutput, dirExistsAndIsNotEmpty } from "../../../utils";
+import { exitWithError, dirExistsAndIsNotEmpty, info } from "../../../utils";
 
 export const command = "file";
 export const desc = "Export project to filesystem";
@@ -42,6 +41,12 @@ export const builder = (yargs) => {
     })
     .option("database", {
       description: "The Neo4j database to use",
+    })
+    .option("options", {
+      alias: "o",
+      description: "A list of CLI options in form -o display report",
+      type: "array",
+      default: [],
     }).example(`$0 deploy file \\
     --types "type Person {name: string}" \\
     --path ./relative/path \\
@@ -66,12 +71,16 @@ export const handler = async ({
   "neo4j-password": neo4j_password,
   encrypted,
   database,
+  options,
 }) => {
+  const display = options.includes(`display`);
+
   if (dirExistsAndIsNotEmpty(filePath)) {
-    exitWithOutput({
+    exitWithError({
       tag: "ERROR",
       msg: `'${filePath}' already exists and is not empty.`,
       code: 1,
+      display,
     });
   }
   if (newProject) {
@@ -136,7 +145,7 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
   }
 }
 `;
-    console.log("Writing new project to ", schemaFile);
+    info({ msg: `Writing new project to  ${schemaFile}`, display });
     try {
       await fs.promises.mkdir(filePath, { recursive: true });
       await fs.promises.writeFile(schemaFile, types);
@@ -144,10 +153,10 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
       await fs.promises.writeFile(gitIgnoreFile, gitIgnoreContents);
       await fs.promises.writeFile(indexFile, indexContents);
       await fs.promises.writeFile(jsonFile, jsonContents);
-      console.log(chalk.green("Done Writing!"));
-      console.log(chalk.green(`cd into ${filePath} and run 'npm install'`));
+      info({ msg: "Done Writing!", display });
+      info({ msg: `cd into ${filePath} and run 'npm install'`, display });
     } catch (err) {
-      exitWithOutput({ tag: "ERROR", msg: err.message, code: 1 });
+      exitWithError({ tag: "ERROR", msg: err.message, code: 1, display });
     }
     return;
   }
@@ -158,8 +167,8 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
     console.log("Writing to ", schemaFile);
     await fs.promises.mkdir(filePath, { recursive: true });
     await fs.promises.writeFile(schemaFile, types);
-    console.log(chalk.green("Done Writing!"));
+    info({ msg: "Done Writing!", display });
   } catch (err) {
-    exitWithOutput({ tag: "ERROR", msg: err.message, code: 1 });
+    exitWithError({ tag: "ERROR", msg: err.message, code: 1, display });
   }
 };
