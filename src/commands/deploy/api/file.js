@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { exitWithError, dirExistsAndIsNotEmpty, info } from "../../../utils";
+import { dirExistsAndIsNotEmpty } from "../../../utils";
 
 export const command = "file";
 export const desc = "Export project to filesystem";
@@ -41,12 +41,6 @@ export const builder = (yargs) => {
     })
     .option("database", {
       description: "The Neo4j database to use",
-    })
-    .option("options", {
-      alias: "o",
-      description: "A list of CLI options in form -o display report",
-      type: "array",
-      default: [],
     }).example(`$0 deploy file \\
     --types "type Person {name: string}" \\
     --path ./relative/path \\
@@ -76,16 +70,12 @@ export const handler = async ({
   const display = options.includes(`display`);
 
   if (dirExistsAndIsNotEmpty(filePath)) {
-    exitWithError({
-      tag: "ERROR",
-      msg: `'${filePath}' already exists and is not empty.`,
-      code: 1,
-      display,
-    });
+    console.log(`ERROR :: '${filePath}' already exists and is not empty.`);
+    process.exit(1);
   }
   if (newProject) {
     if (!neo4j_uri || !neo4j_user || !neo4j_password) {
-      console.error(`Neo4j credentials missing`);
+      console.error(`ERROR :: Neo4j credentials missing`);
       console.log(`Try running agian with credentials \\
       --neo4j-uri bolt://localhost:7687 \\
       --neo4j-user neo4j \\
@@ -145,7 +135,7 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
   }
 }
 `;
-    info({ msg: `Writing new project to  ${schemaFile}`, display });
+    console.log(`Writing new project to  ${schemaFile}`);
     try {
       await fs.promises.mkdir(filePath, { recursive: true });
       await fs.promises.writeFile(schemaFile, types);
@@ -153,10 +143,11 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
       await fs.promises.writeFile(gitIgnoreFile, gitIgnoreContents);
       await fs.promises.writeFile(indexFile, indexContents);
       await fs.promises.writeFile(jsonFile, jsonContents);
-      info({ msg: "Done Writing!", display });
-      info({ msg: `cd into ${filePath} and run 'npm install'`, display });
-    } catch (err) {
-      exitWithError({ tag: "ERROR", msg: err.message, code: 1, display });
+      console.log("Done Writing!");
+      console.log(`cd into ${filePath} and run 'npm install'`);
+    } catch (error) {
+      console.error(`ERROR :: ${error}`);
+      process.exit(1);
     }
     return;
   }
@@ -167,8 +158,9 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
     console.log("Writing to ", schemaFile);
     await fs.promises.mkdir(filePath, { recursive: true });
     await fs.promises.writeFile(schemaFile, types);
-    info({ msg: "Done Writing!", display });
-  } catch (err) {
-    exitWithError({ tag: "ERROR", msg: err.message, code: 1, display });
+    console.log("Done Writing!");
+  } catch (error) {
+    console.error(`ERROR :: ${error}`);
+    process.exit(1);
   }
 };
