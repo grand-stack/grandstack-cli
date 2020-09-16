@@ -65,10 +65,7 @@ export const handler = async ({
   "neo4j-password": neo4j_password,
   encrypted,
   database,
-  options,
 }) => {
-  const display = options.includes(`display`);
-
   if (dirExistsAndIsNotEmpty(filePath)) {
     console.log(`ERROR :: '${filePath}' already exists and is not empty.`);
     process.exit(1);
