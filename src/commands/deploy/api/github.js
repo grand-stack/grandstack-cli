@@ -177,7 +177,7 @@ export const handler = async ({
         repoUrl: finalRef.url,
       };
       console.log(`Commit completed to master branch @: ${finalRef.url}`);
-      console.log(`<refData>${JSON.stringify(refData)}<refData/>`);
+      console.log(`<refData>${JSON.stringify(refData)}</refData>`);
       console.timeEnd(newRepoTag);
     } catch (error) {
       console.error(`GITHUBERR :: ${error}`);
