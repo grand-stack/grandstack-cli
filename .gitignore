@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# make sure a npm lock file doesn't get pushed in yarn project
+package-lock.json
+
 # testing
 /coverage
 

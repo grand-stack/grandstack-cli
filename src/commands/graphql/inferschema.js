@@ -31,6 +31,7 @@ export const builder = (yargs) => {
     })
     .option("neo4j-password", {
       description: "Database password for given user",
+      string: true,
       required: true,
     })
     .option("encrypted", {

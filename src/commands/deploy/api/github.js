@@ -177,7 +177,7 @@ export const handler = async ({
         repoUrl: finalRef.url,
       };
       console.log(`Commit completed to master branch @: ${finalRef.url}`);
-      console.log(`refData::${JSON.stringify(refData)}`);
+      console.log(`<refData>${JSON.stringify(refData)}</refData>`);
       console.timeEnd(newRepoTag);
     } catch (error) {
       console.error(`GITHUBERR :: ${error}`);
@@ -262,56 +262,3 @@ export const handler = async ({
     }
   }
 };
-
-// const qBody =  {
-//   query:   `query FindIssueID {
-//     repository(owner:"octocat", name:"Hello-World") {
-//       issue(number:349) {
-//         id
-//       }
-//     }
-//   }`,
-//   variables: {}
-// }
-
-// const mBody = {
-//   query: `mutation CreateNewRepo {
-//     createRepository(input: { name: "obvs-a-test", visibility: PUBLIC } ) {
-//       repository {
-//         createdAt
-//         name
-//         nameWithOwner
-//       }
-//     }
-//   }`
-// }
-
-// const _opts = { headers: { Authorization: `Bearer ${tokenUser}`, Accept: "application/vnd.github.v3+json", 'User-Agent': 'axios/0.19.2' } };
-
-// try {
-// const _res = await axios.post('https://api.github.com/graphql', qBody, _opts)
-// console.log(_res.data.data)
-// console.log("#################\n")
-// const issueID =  _res.data.data.repository.issue.id
-// const _mres = await axios.post('https://api.github.com/graphql', mBody , _opts)
-// if(_mres.data.errors) {
-//   console.log(_mres.data.errors)
-// } else {
-//   console.log(_mres.data.data)
-// }
-// } catch (error) {
-//   console.log(error)
-// }
-
-// const _url = `https://api.github.com/users/octocat/orgs`;
-// const _opts = { headers: { Authorization: `token ${data.token}`, "User-Agent": "App-Name" } };
-// Accept: application/vnd.github.v3+json
-// const _opts = { headers: { Authorization: `token ${data.token}` } };
-// const _res = await axios.get(_url, _opts);
-
-// curl \
-//   -X POST \
-//   -H "Accept: " \
-//   -H "Authorization: token 7cb5a450d2eb378e61236f5b07655db62a60e0ea" \
-//   https://api.github.com/user/repos \
-//   -d '{"name":"obviously-a-test"}'
