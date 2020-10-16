@@ -94,7 +94,7 @@ export const handler = async ({
     updateRef,
     getTree,
   } = git;
-  const masterRef = "heads/master";
+  const mainRef = "heads/main";
 
   if (newRepo) {
     console.time(newRepoTag);
@@ -115,8 +115,9 @@ export const handler = async ({
       const { data: createdRepoReference } = await getRef({
         owner,
         repo,
-        ref: masterRef,
+        ref: mainRef,
       });
+
       const { object: referenceObject } = createdRepoReference;
       const baseTreeSHA = referenceObject.sha;
 
@@ -168,7 +169,7 @@ export const handler = async ({
       const { data: finalRef } = await updateRef({
         owner,
         repo,
-        ref: masterRef,
+        ref: mainRef,
         sha: commitSHA,
       });
       const refData = {
@@ -176,7 +177,7 @@ export const handler = async ({
         repoName: repo,
         repoUrl: finalRef.url,
       };
-      console.log(`Commit completed to master branch @: ${finalRef.url}`);
+      console.log(`Commit completed to main branch @: ${finalRef.url}`);
       console.log(`<refData>${JSON.stringify(refData)}</refData>`);
       console.timeEnd(newRepoTag);
     } catch (error) {
@@ -192,7 +193,7 @@ export const handler = async ({
       const { data: foundationRepo } = await getRef({
         owner: repoOwner,
         repo: repoName,
-        ref: masterRef,
+        ref: mainRef,
       });
       const { object } = foundationRepo;
       const { sha: foundationRepoSha } = object;
@@ -250,7 +251,7 @@ export const handler = async ({
       const { data: finalRef } = await updateRef({
         owner: repoOwner,
         repo: repoName,
-        ref: masterRef,
+        ref: mainRef,
         sha: commitSHA,
       });
 
