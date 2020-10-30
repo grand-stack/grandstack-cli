@@ -132,6 +132,18 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
   }
 }
 `;
+    const jsonLockFile = path.join(filePath, "package-lock.json");
+    const jsonLockContents = `{
+"scripts": {
+"start": "node index.js"
+},
+"dependencies": {
+"neo4j-graphql-js": "^2.14.4",
+"apollo-server": "^2.15.1",
+"dotenv": "^8.2.0"
+}
+}
+`;
     console.log(`Writing new project to  ${schemaFile}`);
     try {
       await fs.promises.mkdir(filePath, { recursive: true });
@@ -140,6 +152,7 @@ server.listen(3000, "0.0.0.0").then(({ url }) => {
       await fs.promises.writeFile(gitIgnoreFile, gitIgnoreContents);
       await fs.promises.writeFile(indexFile, indexContents);
       await fs.promises.writeFile(jsonFile, jsonContents);
+      await fs.promises.writeFile(jsonLockFile, jsonLockContents);
       console.log("Done Writing!");
       console.log(`cd into ${filePath} and run 'npm install'`);
     } catch (error) {

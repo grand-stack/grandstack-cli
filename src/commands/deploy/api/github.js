@@ -50,6 +50,12 @@ export const builder = (yargs) => {
       description: "Whether or not to encrypt the database",
       type: "boolean",
       default: false,
+    })
+    .option("private-repo", {
+      alias: "p",
+      description: "Whether or not repo is private",
+      type: "boolean",
+      default: false,
     }).example(`$0 deploy github \\
     --types "type Person {name: string}"
     --oauth-token 213r56ert57yertu \\
@@ -57,6 +63,7 @@ export const builder = (yargs) => {
     --repo-owner joeSmith123 \\
     --database neo4j \\
     --encrypted \\
+    --private-repo \\
     --new-repo \\
 `);
 };
@@ -75,6 +82,7 @@ export const handler = async ({
   oauthToken,
   database,
   encrypted,
+  privateRepo,
   logLevel,
 }) => {
   const octoOpts = {
@@ -106,6 +114,7 @@ export const handler = async ({
       const { data: createdRepo } = await createForAuthenticatedUser({
         name: repoName,
         auto_init: true,
+        private: privateRepo,
       });
       const { name: repo, owner: createdRepoOwner } = createdRepo;
       const { login: owner } = createdRepoOwner;
