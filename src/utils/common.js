@@ -1,3 +1,5 @@
+import { getPackageLockJson } from "./file";
+
 export const getNeo4jDatabaseString = (db) => {
   return db ? `{ driver, neo4jDatabase: "${db}" }` : "{ driver }";
 };
@@ -59,6 +61,9 @@ const packageJsonContents = `{
 }
 `;
 
+const packageLockJson = "package-lock.json";
+const packageLockJsonContents = getPackageLockJson();
+
 export const arrayOfFiles = ({ owner, repo, types, database, encrypted }) => [
   {
     owner,
@@ -83,6 +88,12 @@ export const arrayOfFiles = ({ owner, repo, types, database, encrypted }) => [
     repo,
     content: packageJsonContents,
     filename: packageJson,
+  },
+  {
+    owner,
+    repo,
+    content: packageLockJsonContents,
+    filename: packageLockJson,
   },
 ];
 

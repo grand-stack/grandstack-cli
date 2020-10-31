@@ -12,6 +12,11 @@ export const CONFIG_DIR = path.join(HOME, CONFIG_DIR_NAME);
 
 export const exists = (pathToDirOrFile) => fs.existsSync(pathToDirOrFile);
 
+export const getPackageLockJson = () =>
+  fs
+    .readFileSync(path.join(__dirname, "standard-package-lock.json"))
+    .toString();
+
 export const dirIsNotEmpty = (dir) => fs.readdirSync(dir).length > 0;
 
 export const dirExistsAndIsNotEmpty = (dir) =>
