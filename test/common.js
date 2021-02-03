@@ -33,7 +33,7 @@ describe("Common api deploy functions", function () {
   });
 
   describe("arrayOfFiles()", function () {
-    it("should return an array of 4 files", function () {
+    it("should return an array of 5 files", function () {
       const testDataForFiles = {
         owner: "username",
         repo: "great-repo",
@@ -41,7 +41,7 @@ describe("Common api deploy functions", function () {
         database: "neo4j",
         encrypted: false,
       };
-      assert.strictEqual(arrayOfFiles(testDataForFiles).length, 4);
+      assert.strictEqual(arrayOfFiles(testDataForFiles).length, 5);
     });
   });
 });
